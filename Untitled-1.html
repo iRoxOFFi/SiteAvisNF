@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Système d'Avis Staff - FiveM RP</title>
+    <style>
+        /* Variables de couleurs */
+        :root {
+            --primary: #131313;
+            --secondary: rgba(44, 47, 51, 0.85);
+            --dark: rgba(35, 39, 42, 0.7);
+            --light: #ffffff;
+            --success: #57F287;
+            --error: #ED4245;
+            --stars: #FFD700;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: transparent;
+            color: var(--light);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            background-image: url('/api/placeholder/1920/1080');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 600px;
+            background-color: var(--secondary);
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .header {
+            background-color: rgba(24, 24, 24, 0.9);
+            padding: 20px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+
+        .header p {
+            opacity: 0.8;
+        }
+
+        .form-container {
+            padding: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        input[type="text"], 
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border-radius: 5px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background-color: rgba(68, 68, 68, 0.7);
+            color: var(--light);
+            font-size: 16px;
+        }
+
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .star-rating {
+            display: flex;
+            flex-direction: row-reverse;
+            justify-content: flex-end;
+        }
+
+        .star-rating input {
+            display: none;
+        }
+
+        .star-rating label {
+            cursor: pointer;
+            width: 40px;
+            height: 40px;
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" fill="gray"/></svg>') no-repeat center center;
+            background-size: 80%;
+            margin: 5px;
+            transition: all 0.2s ease;
+        }
+
+        .star-rating input:checked ~ label,
+        .star-rating input:hover ~ label {
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" fill="gold"/></svg>') no-repeat center center;
+            background-size: 80%;
+        }
+
+        .btn {
+            background-color: var(--primary);
+            color: var(--light);
+            border: none;
+            padding: 12px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            width: 100%;
+            transition: background-color 0.2s;
+        }
+
+        .btn:hover {
+            background-color: #050505;
+        }
+
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 5px;
+            display: none;
+        }
+
+        .success {
+            background-color: rgba(87, 242, 135, 0.8);
+            color: #fff;
+            display: block;
+        }
+
+        .error {
+            background-color: rgba(237, 66, 69, 0.8);
+            color: #fff;
+            display: block;
+        }
+
+        @media (max-width: 500px) {
+            .header h1 {
+                font-size: 20px;
+            }
+            
+            .star-rating label {
+                width: 30px;
+                height: 30px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Évaluation des Staffs</h1>
+            <p>Partagez votre expérience avec notre équipe</p>
+        </div>
+        <div class="form-container">
+            <form id="reviewForm">
+                <div class="form-group">
+                    <label for="playerName">Votre Nom / ID</label>
+                    <input type="text" id="playerName" required placeholder="Entrez votre nom ou ID dans le jeu">
+                </div>
+                
+                <div class="form-group">
+                    <label for="staffName">Nom du Staff</label>
+                    <input type="text" id="staffName" required placeholder="Entrez le nom du staff à évaluer">
+                </div>
+                
+                <div class="form-group">
+                    <label>Note (1-5 étoiles)</label>
+                    <div class="star-rating">
+                        <input type="radio" id="star5" name="rating" value="5">
+                        <label for="star5" title="5 étoiles"></label>
+                        
+                        <input type="radio" id="star4" name="rating" value="4">
+                        <label for="star4" title="4 étoiles"></label>
+                        
+                        <input type="radio" id="star3" name="rating" value="3">
+                        <label for="star3" title="3 étoiles"></label>
+                        
+                        <input type="radio" id="star2" name="rating" value="2">
+                        <label for="star2" title="2 étoiles"></label>
+                        
+                        <input type="radio" id="star1" name="rating" value="1">
+                        <label for="star1" title="1 étoile"></label>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="comment">Commentaire</label>
+                    <textarea id="comment" required placeholder="Décrivez votre expérience avec ce membre du staff"></textarea>
+                </div>
+                
+                <button type="submit" class="btn">Envoyer l'avis</button>
+            </form>
+            
+            <div id="result" class="result"></div>
+        </div>
+    </div>
+
+    <script>
+        // Configuration - Remplacez cette URL par l'URL de votre webhook Discord
+        const WEBHOOK_URL = "https://discord.com/api/webhooks/1418905548329582612/zk5DydFFAnQTOcx3lceMrxHALKbvCYTf-LMXaoa3NyCsoPdTcgUX-kB_53WyIWUJpDyV";
+        
+        document.getElementById('reviewForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Récupération des données du formulaire
+            const playerName = document.getElementById('playerName').value;
+            const staffName = document.getElementById('staffName').value;
+            const rating = document.querySelector('input[name="rating"]:checked');
+            const comment = document.getElementById('comment').value;
+            
+            // Vérification que tous les champs sont remplis
+            if (!playerName || !staffName || !rating || !comment) {
+                showResult('Veuillez remplir tous les champs', 'error');
+                return;
+            }
+            
+            // Préparation de l'embed Discord
+            const currentDate = new Date().toLocaleDateString('fr-FR');
+            const currentTime = new Date().toLocaleTimeString('fr-FR');
+            
+            // Création des étoiles pour l'affichage
+            let stars = '';
+            for (let i = 0; i < rating.value; i++) {
+                stars += '⭐';
+            }
+            
+            // Préparation du payload pour le webhook Discord
+            const payload = {
+                embeds: [{
+                    title: "Nouvel Avis Staff",
+                    color: 5814783, // Couleur bleu Discord
+                    fields: [
+                        {
+                            name: "Staff évalué",
+                            value: staffName,
+                            inline: true
+                        },
+                        {
+                            name: "Évalué par",
+                            value: playerName,
+                            inline: true
+                        },
+                        {
+                            name: "Note",
+                            value: stars + ` (${rating.value}/5)`,
+                            inline: true
+                        },
+                        {
+                            name: "Commentaire",
+                            value: comment
+                        }
+                    ],
+                    footer: {
+                        text: `Envoyé le ${currentDate} à ${currentTime}`
+                    }
+                }]
+            };
+            
+            // Envoi des données au webhook Discord
+            fetch(WEBHOOK_URL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(payload)
+            })
+            .then(response => {
+                if (response.ok) {
+                    showResult('Votre avis a été envoyé avec succès !', 'success');
+                    document.getElementById('reviewForm').reset();
+                } else {
+                    showResult('Erreur lors de l\'envoi de l\'avis. Veuillez réessayer.', 'error');
+                }
+            })
+            .catch(error => {
+                showResult('Erreur technique: ' + error.message, 'error');
+                console.error('Erreur:', error);
+            });
+        });
+        
+        // Fonction pour afficher le résultat
+        function showResult(message, type) {
+            const resultDiv = document.getElementById('result');
+            resultDiv.textContent = message;
+            resultDiv.className = 'result ' + type;
+            
+            // Faire défiler jusqu'au message de résultat
+            resultDiv.scrollIntoView({ behavior: 'smooth' });
+            
+            // Masquer le message après 5 secondes si c'est un succès
+            if (type === 'success') {
+                setTimeout(() => {
+                    resultDiv.className = 'result';
+                }, 5000);
+            }
+        }
+    </script>
+</body>
+</html>
